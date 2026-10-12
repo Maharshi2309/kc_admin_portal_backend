@@ -1,0 +1,8 @@
+{
+  "permissions": [
+    "dashboard.view",
+    "employee.view",
+    "leave.approve",
+    "leave.view"
+  ]
+}

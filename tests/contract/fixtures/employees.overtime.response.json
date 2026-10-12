@@ -1,0 +1,43 @@
+{
+  "from": "2026-09-01",
+  "to": "2026-09-30",
+  "totalMinutes": 600,
+  "expectedMinutes": 9450,
+  "workedMinutes": 9810,
+  "dayBasisMinutes": 450,
+  "scheduleChanged": false,
+  "months": [
+    {
+      "month": "2026-09-01",
+      "minutes": 600,
+      "expectedMinutes": 9450,
+      "workedMinutes": 9810
+    }
+  ],
+  "days": [
+    {
+      "date": "2026-09-08",
+      "dayKind": "working",
+      "expectedMinutes": 450,
+      "workedMinutes": 540,
+      "overtimeMinutes": 90,
+      "dayBasisMinutes": 450
+    },
+    {
+      "date": "2026-09-13",
+      "dayKind": "week_off_worked",
+      "expectedMinutes": 0,
+      "workedMinutes": 300,
+      "overtimeMinutes": 300,
+      "dayBasisMinutes": 450
+    },
+    {
+      "date": "2026-09-22",
+      "dayKind": "working",
+      "expectedMinutes": 450,
+      "workedMinutes": 660,
+      "overtimeMinutes": 210,
+      "dayBasisMinutes": 450
+    }
+  ]
+}

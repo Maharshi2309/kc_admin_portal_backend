@@ -1,0 +1,27 @@
+{
+  "id": "7",
+  "name": "Nisha Solanki",
+  "email": "nisha.solanki@keshav.in",
+  "permissions": [
+    "dashboard.view",
+    "employee.view",
+    "employee.create",
+    "employee.edit",
+    "attendance.view",
+    "leave.view",
+    "leave.create",
+    "leave.edit",
+    "leave.approve",
+    "calendar.view",
+    "holiday.view"
+  ],
+  "employee": {
+    "id": "25",
+    "name": "Nisha Solanki",
+    "ecNumber": "KC1025",
+    "department": "accountant",
+    "position": "accountant"
+  },
+  "isActive": true,
+  "lastSignInAt": null
+}

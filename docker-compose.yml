@@ -1,0 +1,39 @@
+# Development only: a local MySQL for the backend and its tests (production
+# uses the MySQL database GoDaddy's Node.js hosting provides).
+#
+#   npm run db:up     start (data is kept in the "kc-mysql-data" volume)
+#   npm run db:down   stop
+
+name: kc-admin-portal
+
+services:
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: kc_dev_root_password
+      MYSQL_DATABASE: kc_admin_portal
+      MYSQL_USER: kc
+      MYSQL_PASSWORD: kc_dev_password
+      TZ: UTC
+    # UTC; let the app user create the audit-log triggers; for development
+    # speed, no binary log and relaxed flushing (test runs commit a lot).
+    command:
+      - "--default-time-zone=+00:00"
+      - "--log-bin-trust-function-creators=1"
+      - "--skip-log-bin"
+      - "--innodb-flush-log-at-trx-commit=2"
+    ports:
+      - "3306:3306"
+    volumes:
+      - kc-mysql-data:/var/lib/mysql
+      # Creates the separate test database on first start.
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -ukc -pkc_dev_password --silent"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  kc-mysql-data:

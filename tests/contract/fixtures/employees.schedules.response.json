@@ -1,0 +1,40 @@
+[
+  {
+    "id": "31",
+    "effectiveFrom": "2026-04-01",
+    "effectiveTo": null,
+    "startTime": "09:00",
+    "endTime": "17:30",
+    "breakMinutes": 60,
+    "breakStart": "13:00",
+    "breakEnd": "14:00",
+    "weeklyOffDays": [
+      7
+    ],
+    "expectedMinutes": 450,
+    "createdBy": {
+      "id": "1",
+      "name": "Admin"
+    },
+    "createdAt": "2026-03-25T10:15:00+05:30"
+  },
+  {
+    "id": "12",
+    "effectiveFrom": "2021-01-12",
+    "effectiveTo": "2026-03-31",
+    "startTime": "09:30",
+    "endTime": "18:30",
+    "breakMinutes": 60,
+    "breakStart": null,
+    "breakEnd": null,
+    "weeklyOffDays": [
+      7
+    ],
+    "expectedMinutes": 480,
+    "createdBy": {
+      "id": "1",
+      "name": "Admin"
+    },
+    "createdAt": "2021-01-10T09:00:00+05:30"
+  }
+]

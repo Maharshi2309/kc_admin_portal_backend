@@ -1,0 +1,27 @@
+{
+  "items": [
+    {
+      "id": "5012",
+      "action": "attendance.correct",
+      "summary": "Corrected punch in",
+      "actor": {
+        "id": "1",
+        "name": "Admin"
+      },
+      "createdAt": "2026-10-03T18:02:00+05:30",
+      "changes": [
+        {
+          "field": "punchIn",
+          "label": "Punch in",
+          "before": "10:05",
+          "after": "09:40"
+        }
+      ],
+      "reason": "device_issue",
+      "remarks": "Biometric device at gate was offline till 10:00."
+    }
+  ],
+  "total": 1,
+  "page": 1,
+  "pageSize": 20
+}

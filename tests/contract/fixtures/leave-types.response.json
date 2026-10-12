@@ -1,0 +1,14 @@
+[
+  {
+    "id": "casual",
+    "name": "Casual",
+    "hasBalance": true,
+    "isPaid": true
+  },
+  {
+    "id": "unpaid",
+    "name": "Unpaid",
+    "hasBalance": false,
+    "isPaid": false
+  }
+]

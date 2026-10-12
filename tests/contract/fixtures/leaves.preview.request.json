@@ -1,0 +1,8 @@
+{
+  "employeeId": "10",
+  "leaveTypeId": "casual",
+  "startDate": "2026-10-05",
+  "endDate": "2026-10-07",
+  "isHalfDay": false,
+  "leaveId": null
+}

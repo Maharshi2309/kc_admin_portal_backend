@@ -1,0 +1,66 @@
+{
+  "items": [
+    {
+      "id": "1",
+      "name": "Admin",
+      "email": "admin@keshav.in",
+      "permissions": [
+        "dashboard.view",
+        "employee.view",
+        "employee.create",
+        "employee.edit",
+        "employee.deactivate",
+        "schedule.edit",
+        "attendance.view",
+        "attendance.punch",
+        "attendance.correct",
+        "overtime.view",
+        "leave.view",
+        "leave.create",
+        "leave.edit",
+        "leave.cancel",
+        "leave.approve",
+        "calendar.view",
+        "holiday.view",
+        "holiday.create",
+        "holiday.edit",
+        "holiday.delete",
+        "permission.manage",
+        "audit.view"
+      ],
+      "employee": null,
+      "isActive": true,
+      "lastSignInAt": "2026-09-30T09:12:00+05:30"
+    },
+    {
+      "id": "7",
+      "name": "Nisha Solanki",
+      "email": "nisha.solanki@keshav.in",
+      "permissions": [
+        "dashboard.view",
+        "employee.view",
+        "employee.create",
+        "employee.edit",
+        "attendance.view",
+        "leave.view",
+        "leave.create",
+        "leave.edit",
+        "leave.approve",
+        "calendar.view",
+        "holiday.view"
+      ],
+      "employee": {
+        "id": "25",
+        "name": "Nisha Solanki",
+        "ecNumber": "KC1025",
+        "department": "accountant",
+        "position": "accountant"
+      },
+      "isActive": true,
+      "lastSignInAt": null
+    }
+  ],
+  "total": 2,
+  "page": 1,
+  "pageSize": 10
+}

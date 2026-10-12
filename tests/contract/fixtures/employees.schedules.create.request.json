@@ -1,0 +1,11 @@
+{
+  "effectiveFrom": "2026-10-01",
+  "startTime": "10:00",
+  "endTime": "18:30",
+  "breakMinutes": 60,
+  "breakStart": "13:00",
+  "breakEnd": "14:00",
+  "weeklyOffDays": [
+    7
+  ]
+}

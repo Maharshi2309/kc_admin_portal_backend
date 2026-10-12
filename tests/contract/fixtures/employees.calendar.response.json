@@ -1,0 +1,148 @@
+{
+  "month": "2026-10-01",
+  "days": [
+    {
+      "date": "2026-10-01",
+      "dayType": "working",
+      "holidayName": null,
+      "schedule": {
+        "startTime": "09:00",
+        "endTime": "17:30",
+        "expectedMinutes": 450
+      },
+      "attendance": {
+        "id": "a-1-20261001",
+        "status": "present",
+        "dayKind": "working",
+        "punchIn": "2026-10-01T08:58:00+05:30",
+        "punchOut": "2026-10-01T19:00:00+05:30",
+        "workedMinutes": 542,
+        "corrected": false
+      },
+      "leaves": [],
+      "overtimeMinutes": 92
+    },
+    {
+      "date": "2026-10-02",
+      "dayType": "holiday",
+      "holidayName": "Gandhi Jayanti",
+      "schedule": null,
+      "attendance": {
+        "id": "a-1-20261002",
+        "status": "present",
+        "dayKind": "holiday_worked",
+        "punchIn": "2026-10-02T10:00:00+05:30",
+        "punchOut": "2026-10-02T15:00:00+05:30",
+        "workedMinutes": 300,
+        "corrected": false
+      },
+      "leaves": [],
+      "overtimeMinutes": 300
+    },
+    {
+      "date": "2026-10-03",
+      "dayType": "working",
+      "holidayName": null,
+      "schedule": {
+        "startTime": "09:00",
+        "endTime": "17:30",
+        "expectedMinutes": 450
+      },
+      "attendance": {
+        "id": "a-1-20261003",
+        "status": "late",
+        "dayKind": "working",
+        "punchIn": "2026-10-03T09:40:00+05:30",
+        "punchOut": "2026-10-03T17:35:00+05:30",
+        "workedMinutes": 415,
+        "corrected": true
+      },
+      "leaves": [],
+      "overtimeMinutes": 0
+    },
+    {
+      "date": "2026-10-04",
+      "dayType": "week_off",
+      "holidayName": null,
+      "schedule": null,
+      "attendance": null,
+      "leaves": [],
+      "overtimeMinutes": 0
+    },
+    {
+      "date": "2026-10-05",
+      "dayType": "working",
+      "holidayName": null,
+      "schedule": {
+        "startTime": "09:00",
+        "endTime": "17:30",
+        "expectedMinutes": 450
+      },
+      "attendance": {
+        "id": null,
+        "status": "on_leave",
+        "dayKind": "working",
+        "punchIn": null,
+        "punchOut": null,
+        "workedMinutes": null,
+        "corrected": false
+      },
+      "leaves": [
+        {
+          "id": "88",
+          "leaveType": {
+            "id": "casual",
+            "name": "Casual"
+          },
+          "status": "approved",
+          "isHalfDay": false
+        }
+      ],
+      "overtimeMinutes": 0
+    },
+    {
+      "date": "2026-10-06",
+      "dayType": "working",
+      "holidayName": null,
+      "schedule": {
+        "startTime": "09:00",
+        "endTime": "17:30",
+        "expectedMinutes": 450
+      },
+      "attendance": {
+        "id": null,
+        "status": "absent",
+        "dayKind": "working",
+        "punchIn": null,
+        "punchOut": null,
+        "workedMinutes": null,
+        "corrected": false
+      },
+      "leaves": [
+        {
+          "id": "91",
+          "leaveType": {
+            "id": "casual",
+            "name": "Casual"
+          },
+          "status": "pending",
+          "isHalfDay": false
+        }
+      ],
+      "overtimeMinutes": 0
+    }
+  ],
+  "summary": {
+    "workingDays": 4,
+    "present": 2,
+    "absent": 1,
+    "leaveDays": 1,
+    "holidays": 1,
+    "weekOffs": 1,
+    "holidayWorked": 1,
+    "weekOffWorked": 0,
+    "expectedMinutes": 1350,
+    "workedMinutes": 1257,
+    "overtimeMinutes": 392
+  }
+}

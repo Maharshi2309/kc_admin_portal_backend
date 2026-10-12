@@ -1,0 +1,69 @@
+{
+  "summary": {
+    "date": "2026-09-28",
+    "totalEmployees": 124,
+    "present": 104,
+    "late": 6,
+    "onLeave": 9,
+    "absent": 11,
+    "notPunchedIn": 11
+  },
+  "items": [
+    {
+      "id": null,
+      "employee": {
+        "id": "3",
+        "name": "Rohan Patel",
+        "ecNumber": "KC1007",
+        "department": "graphic_designer",
+        "position": "graphic_designer"
+      },
+      "date": "2026-09-28",
+      "punchIn": null,
+      "punchOut": null,
+      "workedMinutes": null,
+      "workedPercent": null,
+      "status": "absent",
+      "note": null,
+      "dayKind": "working",
+      "schedule": {
+        "startTime": "09:30",
+        "endTime": "18:30",
+        "expectedMinutes": 480
+      },
+      "expectedMinutes": 480,
+      "overtimeMinutes": 0
+    },
+    {
+      "id": "a-7-20260928",
+      "employee": {
+        "id": "7",
+        "name": "Arjun Joshi",
+        "ecNumber": "KC1019",
+        "department": "tailor",
+        "position": "tailor"
+      },
+      "date": "2026-09-28",
+      "punchIn": "2026-09-28T10:08:00+05:30",
+      "punchOut": null,
+      "workedMinutes": 262,
+      "workedPercent": 54.6,
+      "status": "late",
+      "note": null,
+      "lateMinutes": 38,
+      "correctedBy": null,
+      "correctedAt": null,
+      "dayKind": "working",
+      "schedule": {
+        "startTime": "09:30",
+        "endTime": "18:30",
+        "expectedMinutes": 480
+      },
+      "expectedMinutes": 480,
+      "overtimeMinutes": 0
+    }
+  ],
+  "total": 124,
+  "page": 1,
+  "pageSize": 20
+}

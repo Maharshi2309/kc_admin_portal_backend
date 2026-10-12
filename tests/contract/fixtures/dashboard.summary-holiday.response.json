@@ -1,0 +1,40 @@
+{
+  "date": "2026-10-02",
+  "totalEmployees": 124,
+  "scheduledToday": 0,
+  "presentToday": 0,
+  "onLeaveToday": 0,
+  "absentToday": 0,
+  "presentPercent": null,
+  "onLeavePercent": null,
+  "absentPercent": null,
+  "holiday": {
+    "id": "12",
+    "date": "2026-10-02",
+    "name": "Gandhi Jayanti",
+    "description": null
+  },
+  "weekOffToday": 0,
+  "holidayWorkedToday": 2,
+  "weekOffWorkedToday": 0,
+  "overtimeMinutesThisMonth": 2550,
+  "overtimeEmployeesThisMonth": 8,
+  "attention": [
+    {
+      "kind": "pending_leave",
+      "count": 3
+    }
+  ],
+  "notPunchedIn": [],
+  "notPunchedInTotal": 0,
+  "onLeave": [],
+  "leaveUsage": {
+    "year": 2026,
+    "casualRemainingDays": 412,
+    "casualTakenDays": 286,
+    "unpaidTakenDays": 26,
+    "approvedThisMonth": 41,
+    "pendingThisMonth": 3,
+    "rejectedThisMonth": 2
+  }
+}

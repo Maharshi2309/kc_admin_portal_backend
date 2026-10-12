@@ -1,0 +1,30 @@
+# dependencies
+/node_modules
+
+# Next.js
+/.next/
+/out/
+next-env.d.ts
+
+# build and test output
+/build
+/coverage
+*.tsbuildinfo
+
+# environment: only the example file is committed
+.env
+.env.*
+!.env.example
+
+# logs
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/settings.json
+.idea/
+
+# generated Prisma client (rebuilt by `npm install` / `npm run db:generate`)
+/src/generated/

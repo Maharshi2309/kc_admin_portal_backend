@@ -1,0 +1,33 @@
+{
+  "id": "1",
+  "ecNumber": "KC1001",
+  "name": "Aarav Shah",
+  "mobile": "9825011234",
+  "department": "graphic_designer",
+  "position": "graphic_designer",
+  "joiningDate": "2021-01-12",
+  "status": "active",
+  "todayStatus": "present",
+  "updatedAt": "2026-09-12T11:05:00+05:30",
+  "updatedBy": "Admin",
+  "schedule": {
+    "id": "31",
+    "effectiveFrom": "2026-04-01",
+    "effectiveTo": null,
+    "startTime": "09:00",
+    "endTime": "17:30",
+    "breakMinutes": 60,
+    "breakStart": "13:00",
+    "breakEnd": "14:00",
+    "weeklyOffDays": [
+      7
+    ],
+    "expectedMinutes": 450,
+    "createdBy": {
+      "id": "1",
+      "name": "Admin"
+    },
+    "createdAt": "2026-03-25T10:15:00+05:30"
+  },
+  "overtimeMinutesThisYear": 765
+}

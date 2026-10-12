@@ -1,0 +1,8 @@
+{
+  "employeeId": null,
+  "date": "2026-09-28",
+  "punchIn": "2026-09-28T09:35:00+05:30",
+  "punchOut": null,
+  "reason": "device_issue",
+  "remarks": "Biometric device at gate was offline till 10:00."
+}

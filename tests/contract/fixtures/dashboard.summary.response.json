@@ -1,0 +1,63 @@
+{
+  "date": "2026-09-28",
+  "totalEmployees": 124,
+  "scheduledToday": 124,
+  "presentToday": 104,
+  "onLeaveToday": 9,
+  "absentToday": 11,
+  "presentPercent": 84,
+  "onLeavePercent": 7,
+  "absentPercent": 9,
+  "holiday": null,
+  "weekOffToday": 0,
+  "holidayWorkedToday": 0,
+  "weekOffWorkedToday": 0,
+  "overtimeMinutesThisMonth": 2550,
+  "overtimeEmployeesThisMonth": 8,
+  "attention": [
+    {
+      "kind": "not_punched_in",
+      "count": 11
+    },
+    {
+      "kind": "pending_leave",
+      "count": 3
+    },
+    {
+      "kind": "late_arrival",
+      "count": 6
+    }
+  ],
+  "notPunchedIn": [
+    {
+      "id": "3",
+      "name": "Rohan Patel",
+      "ecNumber": "KC1007",
+      "department": "graphic_designer",
+      "position": "graphic_designer"
+    }
+  ],
+  "notPunchedInTotal": 11,
+  "onLeave": [
+    {
+      "employee": {
+        "id": "2",
+        "name": "Priya Desai",
+        "ecNumber": "KC1004"
+      },
+      "leaveType": "Casual",
+      "endDate": "2026-09-30",
+      "days": 3,
+      "isHalfDay": false
+    }
+  ],
+  "leaveUsage": {
+    "year": 2026,
+    "casualRemainingDays": 412,
+    "casualTakenDays": 286,
+    "unpaidTakenDays": 26,
+    "approvedThisMonth": 41,
+    "pendingThisMonth": 3,
+    "rejectedThisMonth": 2
+  }
+}

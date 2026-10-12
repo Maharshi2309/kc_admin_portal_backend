@@ -1,0 +1,52 @@
+{
+  "name": "kc-admin-portal-backend",
+  "version": "0.4.0",
+  "private": true,
+  "description": "REST API for the Keshav Admin Portal (Flutter app in kc_admin_portal).",
+  "main": "start.js",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "start": "node start.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "postinstall": "prisma generate",
+    "db:up": "docker compose up -d --wait mysql",
+    "db:down": "docker compose down",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:studio": "prisma studio",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:sample": "tsx prisma/sample-data.ts",
+    "test:db:reset": "node -e \"process.env.DATABASE_URL='mysql://kc:kc_dev_password@127.0.0.1:3306/kc_admin_portal_test';require('child_process').execSync('npx prisma migrate reset --force',{stdio:'inherit'})\"",
+    "start:local": "node server.js",
+    "package:godaddy": "node scripts/package-godaddy.mjs",
+    "openapi:export": "tsx scripts/export-openapi.ts"
+  },
+  "dependencies": {
+    "@node-rs/argon2": "^2.2.1",
+    "@prisma/adapter-mariadb": "^7.10.0",
+    "@prisma/client": "^7.10.0",
+    "@types/luxon": "^3.7.6",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "jose": "^6.2.12",
+    "luxon": "^3.7.2",
+    "mariadb": "^3.5.4",
+    "next": "^16.3.8",
+    "prisma": "^7.10.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "typescript": "^7.0.2",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "tsx": "^4.23.15",
+    "vitest": "^5.0.3"
+  }
+}

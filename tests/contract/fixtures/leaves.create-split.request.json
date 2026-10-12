@@ -1,0 +1,11 @@
+{
+  "employeeId": "10",
+  "leaveTypeId": "casual",
+  "startDate": "2026-10-12",
+  "endDate": "2026-10-20",
+  "isHalfDay": false,
+  "reason": "travel",
+  "remarks": null,
+  "status": "approved",
+  "splitExcessAsUnpaid": true
+}

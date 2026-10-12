@@ -1,0 +1,464 @@
+// Keshav Admin Portal database (MySQL 8, as provided by GoDaddy's Node.js
+// hosting; switched from PostgreSQL on 2026-10-02 at the client's request).
+//
+// Conventions (architecture analysis §16, DATABASE_V2.md §1):
+// - Tables and columns are snake_case in the database, camelCase in code.
+// - Instants are DATETIME(3) holding UTC (the connection runs in UTC).
+//   Calendar dates are DATE; times of day are TIME.
+// - Text comparison follows MySQL's default case-insensitive collation, so
+//   unique emails and searches ignore case.
+// - Integer ids, sent to the app as strings. Natural keys where the app
+//   uses them (permission keys).
+// - Tables are added module by module; nothing is removed without approval.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+// ---------------------------------------------------------------------------
+// Staff users and permissions (DATABASE_V2.md §2.4). No roles: each user has
+// their own permission keys. Employees don't sign in.
+// ---------------------------------------------------------------------------
+
+model User {
+  id           Int       @id @default(autoincrement())
+  name         String    @db.VarChar(100)
+  /// Stored lower-case by the service, so uniqueness is case-insensitive.
+  email        String    @unique @db.VarChar(254)
+  /// Null until the user sets a password (set-up flow: client question T-06).
+  passwordHash String?   @map("password_hash") @db.VarChar(255)
+  isActive     Boolean   @default(true) @map("is_active")
+  /// Optional link to the staff member's own employee record (one user per employee).
+  employeeId   Int?      @unique @map("employee_id")
+  lastSignInAt DateTime? @map("last_sign_in_at") @db.DateTime(3)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.DateTime(3)
+
+  employee    Employee?        @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  permissions UserPermission[]
+  sessions    Session[]
+  auditLogs   AuditLog[]
+
+  employeesCreated Employee[]               @relation("EmployeeCreatedBy")
+  employeesUpdated Employee[]               @relation("EmployeeUpdatedBy")
+  schedulesCreated EmployeeWorkSchedule[]
+  holidaysCreated  CompanyHoliday[]         @relation("HolidayCreatedBy")
+  holidaysUpdated  CompanyHoliday[]         @relation("HolidayUpdatedBy")
+  holidaysDeleted  CompanyHoliday[]         @relation("HolidayDeletedBy")
+  punchesIn        AttendanceRecord[]       @relation("PunchedInBy")
+  punchesOut       AttendanceRecord[]       @relation("PunchedOutBy")
+  corrections      AttendanceRecord[]       @relation("CorrectedBy")
+  leavesCreated    Leave[]                  @relation("LeaveCreatedBy")
+  leavesDecided    Leave[]                  @relation("LeaveDecidedBy")
+  leavesCancelled  Leave[]                  @relation("LeaveCancelledBy")
+  leaveAdjustments LeaveBalanceAdjustment[]
+
+  @@map("users")
+}
+
+/// The permission catalogue. Rows are seeded from code; the app can't create
+/// permissions.
+model Permission {
+  key         String  @id @db.VarChar(64)
+  module      String  @db.VarChar(32)
+  action      String  @db.VarChar(32)
+  label       String  @db.VarChar(100)
+  description String? @db.VarChar(255)
+  sort        Int
+
+  users UserPermission[]
+
+  @@map("permissions")
+}
+
+model UserPermission {
+  userId        Int      @map("user_id")
+  permissionKey String   @map("permission_key") @db.VarChar(64)
+  createdAt     DateTime @default(now()) @map("created_at") @db.DateTime(3)
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Removing a key from the catalogue removes its grants.
+  permission Permission @relation(fields: [permissionKey], references: [key], onDelete: Cascade)
+
+  @@id([userId, permissionKey])
+  @@index([permissionKey])
+  @@map("user_permissions")
+}
+
+/// One signed-in device. The access token carries the session id, so logout
+/// and forced sign-out revoke it (approved architecture §19).
+model Session {
+  id        String    @id @default(uuid()) @db.Char(36)
+  userId    Int       @map("user_id")
+  createdAt DateTime  @default(now()) @map("created_at") @db.DateTime(3)
+  expiresAt DateTime  @map("expires_at") @db.DateTime(3)
+  revokedAt DateTime? @map("revoked_at") @db.DateTime(3)
+  userAgent String?   @map("user_agent") @db.VarChar(255)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+// ---------------------------------------------------------------------------
+// Department and position lists (API_CONTRACT.md "Department and position",
+// changed 2026-10-05). Employees carry the codes. The lists start with
+// accountant, graphic_designer and tailor and can grow (client answer
+// 2026-10-06), so they are tables rather than a fixed enum.
+// ---------------------------------------------------------------------------
+
+model Department {
+  id        Int      @id @default(autoincrement())
+  /// What the API sends and accepts, e.g. `graphic_designer`.
+  code      String   @unique @db.VarChar(50)
+  name      String   @unique @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.DateTime(3)
+
+  employees Employee[]
+
+  @@map("departments")
+}
+
+/// Positions are independent of departments (the app uses one shared list).
+model Position {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique @db.VarChar(50)
+  name      String   @unique @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.DateTime(3)
+
+  employees Employee[]
+
+  @@map("positions")
+}
+
+/// A leave type (`GET /leave-types`). The id is a slug the app sends back.
+/// Only `casual` (paid, with the monthly balance) and `unpaid` are active
+/// (2026-10-05); retired types stay in the table, inactive.
+model LeaveType {
+  id         String   @id @db.VarChar(32)
+  name       String   @unique @db.VarChar(50)
+  /// False for types not limited by a balance (unpaid).
+  hasBalance Boolean  @default(true) @map("has_balance")
+  isPaid     Boolean  @default(true) @map("is_paid")
+  sort       Int      @default(0)
+  isActive   Boolean  @default(true) @map("is_active")
+  createdAt  DateTime @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.DateTime(3)
+
+  leaves Leave[]
+
+  @@map("leave_types")
+}
+
+// ---------------------------------------------------------------------------
+// Employees and their working schedules (API_CONTRACT.md "Employees",
+// DATABASE_V2.md §2.1). The app only deactivates employees; the main admin
+// can delete one through `DELETE /api/admin/employees/{id}`.
+// ---------------------------------------------------------------------------
+
+enum EmployeeStatus {
+  active
+  inactive
+
+  @@map("employee_status")
+}
+
+model Employee {
+  id             Int            @id @default(autoincrement())
+  /// "KC" followed by digits (client rule, 2026-09-29). Unique.
+  ecNumber       String         @unique @map("ec_number") @db.VarChar(20)
+  name           String         @db.VarChar(100)
+  /// 10 digits, without +91.
+  mobile         String         @db.Char(10)
+  /// A `departments.code`.
+  departmentCode String         @map("department") @db.VarChar(50)
+  /// A `positions.code`.
+  positionCode   String         @map("position") @db.VarChar(50)
+  joiningDate    DateTime       @map("joining_date") @db.Date
+  status         EmployeeStatus @default(active)
+  createdById    Int            @map("created_by")
+  updatedById    Int            @map("updated_by")
+  createdAt      DateTime       @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt      DateTime       @updatedAt @map("updated_at") @db.DateTime(3)
+
+  department Department @relation(fields: [departmentCode], references: [code], onDelete: Restrict)
+  position   Position   @relation(fields: [positionCode], references: [code], onDelete: Restrict)
+  createdBy  User       @relation("EmployeeCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  updatedBy  User       @relation("EmployeeUpdatedBy", fields: [updatedById], references: [id], onDelete: Restrict)
+
+  schedules        EmployeeWorkSchedule[]
+  attendance       AttendanceRecord[]
+  leaves           Leave[]
+  leaveAdjustments LeaveBalanceAdjustment[]
+  auditLogs        AuditLog[]
+  user             User?
+
+  @@index([status])
+  @@index([departmentCode])
+  @@index([positionCode])
+  @@index([joiningDate])
+  @@map("employees")
+}
+
+/// One version of an employee's schedule. A change adds a version from its
+/// effective date, so past days keep the schedule they were worked under.
+/// The schedule for a date: effective_from <= date and (effective_to is null
+/// or >= date). Versions never overlap (checked by the service under a row
+/// lock; UNIQUE below guards the same start day).
+model EmployeeWorkSchedule {
+  id              Int       @id @default(autoincrement())
+  employeeId      Int       @map("employee_id")
+  effectiveFrom   DateTime  @map("effective_from") @db.Date
+  /// Last day of this version; null = still current.
+  effectiveTo     DateTime? @map("effective_to") @db.Date
+  startTime       DateTime  @map("start_time") @db.Time(0)
+  endTime         DateTime  @map("end_time") @db.Time(0)
+  breakMinutes    Int       @default(0) @map("break_minutes")
+  breakStart      DateTime? @map("break_start") @db.Time(0)
+  breakEnd        DateTime? @map("break_end") @db.Time(0)
+  /// ISO weekdays as a JSON array, 1 = Monday ... 7 = Sunday, e.g. [7]. May be empty.
+  weeklyOffDays   Json      @map("weekly_off_days")
+  /// end - start - break, in minutes (CHECK keeps it consistent).
+  expectedMinutes Int       @map("expected_minutes")
+  createdById     Int       @map("created_by")
+  createdAt       DateTime  @default(now()) @map("created_at") @db.DateTime(3)
+
+  employee   Employee           @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  createdBy  User               @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  attendance AttendanceRecord[]
+
+  @@unique([employeeId, effectiveFrom])
+  @@index([employeeId, effectiveFrom(sort: Desc)])
+  @@map("employee_work_schedules")
+}
+
+// ---------------------------------------------------------------------------
+// Attendance (API_CONTRACT.md "Attendance", DATABASE_V2.md §2.3). A row exists
+// once something was recorded for the day; an absence has no row. Status and
+// minutes are snapshots written by the day engine on every change; the API
+// recomputes them live (today's status depends on the time of day).
+// ---------------------------------------------------------------------------
+
+enum AttendanceStatus {
+  present
+  late
+  half_day
+  on_leave
+  absent
+  weekly_off
+  holiday
+
+  @@map("attendance_status")
+}
+
+enum AttendanceDayKind {
+  working
+  holiday_worked
+  week_off_worked
+
+  @@map("attendance_day_kind")
+}
+
+/// Why an admin changed a record (the app's fixed list).
+enum CorrectionReason {
+  forgot_to_punch
+  device_issue
+  on_field_duty
+  wrong_time_recorded
+  other
+
+  @@map("correction_reason")
+}
+
+model AttendanceRecord {
+  id              Int               @id @default(autoincrement())
+  employeeId      Int               @map("employee_id")
+  date            DateTime          @db.Date
+  punchIn         DateTime?         @map("punch_in") @db.DateTime(3)
+  punchOut        DateTime?         @map("punch_out") @db.DateTime(3)
+  punchedInById   Int?              @map("punched_in_by")
+  punchedOutById  Int?              @map("punched_out_by")
+  // Snapshots from computeDay (DATABASE_V2.md §2.3):
+  status          AttendanceStatus
+  note            String?           @db.VarChar(100)
+  dayKind         AttendanceDayKind @default(working) @map("day_kind")
+  /// The schedule version used; null on holidays and weekly offs.
+  scheduleId      Int?              @map("schedule_id")
+  expectedMinutes Int               @default(0) @map("expected_minutes")
+  /// Null while a punch is open.
+  workedMinutes   Int?              @map("worked_minutes")
+  overtimeMinutes Int               @default(0) @map("overtime_minutes")
+  // Corrections:
+  correctedById   Int?              @map("corrected_by")
+  correctedAt     DateTime?         @map("corrected_at") @db.DateTime(3)
+  reason          CorrectionReason?
+  remarks         String?           @db.Text
+  createdAt       DateTime          @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt       DateTime          @updatedAt @map("updated_at") @db.DateTime(3)
+
+  employee     Employee              @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  schedule     EmployeeWorkSchedule? @relation(fields: [scheduleId], references: [id], onDelete: Restrict)
+  punchedInBy  User?                 @relation("PunchedInBy", fields: [punchedInById], references: [id], onDelete: Restrict)
+  punchedOutBy User?                 @relation("PunchedOutBy", fields: [punchedOutById], references: [id], onDelete: Restrict)
+  correctedBy  User?                 @relation("CorrectedBy", fields: [correctedById], references: [id], onDelete: Restrict)
+
+  @@unique([employeeId, date])
+  @@index([date])
+  @@map("attendance_records")
+}
+
+// ---------------------------------------------------------------------------
+// Leave (API_CONTRACT.md "Leave"). Never deleted: cancelled leave stays in the
+// history. `days` is a snapshot (working days in the range, half day 0.5),
+// recalculated when holidays or schedules change.
+// ---------------------------------------------------------------------------
+
+enum LeaveStatus {
+  pending
+  approved
+  rejected
+  cancelled
+
+  @@map("leave_status")
+}
+
+/// The app's reason chips.
+enum LeaveReason {
+  personal_work
+  family_function
+  medical
+  travel
+  other
+
+  @@map("leave_reason")
+}
+
+model Leave {
+  id             Int         @id @default(autoincrement())
+  employeeId     Int         @map("employee_id")
+  leaveTypeId    String      @map("leave_type_id") @db.VarChar(32)
+  startDate      DateTime    @map("start_date") @db.Date
+  endDate        DateTime    @map("end_date") @db.Date
+  isHalfDay      Boolean     @default(false) @map("is_half_day")
+  days           Decimal     @db.Decimal(5, 1)
+  reason         LeaveReason
+  remarks        String?     @db.Text
+  status         LeaveStatus
+  createdById    Int         @map("created_by")
+  decidedById    Int?        @map("decided_by")
+  decidedAt      DateTime?   @map("decided_at") @db.DateTime(3)
+  cancelledById  Int?        @map("cancelled_by")
+  cancelledAt    DateTime?   @map("cancelled_at") @db.DateTime(3)
+  /// On the Unpaid part of a split leave: its Casual part (DATABASE_V2.md §2.7).
+  unpaidPartOfId Int?        @unique @map("unpaid_part_of")
+  createdAt      DateTime    @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt      DateTime    @updatedAt @map("updated_at") @db.DateTime(3)
+
+  employee     Employee  @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  leaveType    LeaveType @relation(fields: [leaveTypeId], references: [id], onDelete: Restrict)
+  createdBy    User      @relation("LeaveCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  decidedBy    User?     @relation("LeaveDecidedBy", fields: [decidedById], references: [id], onDelete: Restrict)
+  cancelledBy  User?     @relation("LeaveCancelledBy", fields: [cancelledById], references: [id], onDelete: Restrict)
+  unpaidPartOf Leave?    @relation("LeaveSplit", fields: [unpaidPartOfId], references: [id], onDelete: Restrict)
+  unpaidPart   Leave?    @relation("LeaveSplit")
+
+  @@index([employeeId, startDate, endDate])
+  @@index([status])
+  @@index([leaveTypeId])
+  @@map("leaves")
+}
+
+/// Opening balances and corrections of Casual leave (DATABASE_V2.md §2.7).
+/// They count as earned from `effective_month`. No API writes them yet;
+/// opening balances are 0 (client answer 2026-10-06).
+model LeaveBalanceAdjustment {
+  id             Int      @id @default(autoincrement())
+  employeeId     Int      @map("employee_id")
+  /// Positive or negative, in 0.5 steps.
+  days           Decimal  @db.Decimal(5, 1)
+  /// The 1st of a month.
+  effectiveMonth DateTime @map("effective_month") @db.Date
+  reason         String   @db.Text
+  createdById    Int      @map("created_by")
+  createdAt      DateTime @default(now()) @map("created_at") @db.DateTime(3)
+
+  employee  Employee @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  createdBy User     @relation(fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@index([employeeId, effectiveMonth])
+  @@map("leave_balance_adjustments")
+}
+
+// ---------------------------------------------------------------------------
+// Company holidays (DATABASE_V2.md §2.2). Apply to every employee. Deleting is
+// a soft delete, so audit entries keep their subject. One holiday per date
+// among those not deleted: `live_date` equals `date` while the holiday exists
+// and is null once deleted, and it is unique.
+// ---------------------------------------------------------------------------
+
+model CompanyHoliday {
+  id          Int       @id @default(autoincrement())
+  date        DateTime  @db.Date
+  /// `date` while not deleted, null once deleted (unique: one holiday per date).
+  liveDate    DateTime? @unique @map("live_date") @db.Date
+  name        String    @db.VarChar(100)
+  description String?   @db.Text
+  createdById Int       @map("created_by")
+  updatedById Int       @map("updated_by")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.DateTime(3)
+  deletedAt   DateTime? @map("deleted_at") @db.DateTime(3)
+  deletedById Int?      @map("deleted_by")
+
+  createdBy User  @relation("HolidayCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  updatedBy User  @relation("HolidayUpdatedBy", fields: [updatedById], references: [id], onDelete: Restrict)
+  deletedBy User? @relation("HolidayDeletedBy", fields: [deletedById], references: [id], onDelete: Restrict)
+
+  @@index([date])
+  @@map("company_holidays")
+}
+
+// ---------------------------------------------------------------------------
+// Audit log (DATABASE_V2.md §2.5, §5). Append-only: written by services in the
+// same transaction as the change; a database trigger blocks UPDATE and DELETE.
+// ---------------------------------------------------------------------------
+
+model AuditLog {
+  id           BigInt    @id @default(autoincrement())
+  /// Null once the acting user was deleted by the main admin.
+  actorUserId  Int?      @map("actor_user_id")
+  /// e.g. `attendance.correct` (list in src/modules/audit/audit.types.ts)
+  action       String    @db.VarChar(64)
+  entityType   String    @map("entity_type") @db.VarChar(32)
+  entityId     String    @map("entity_id") @db.VarChar(64)
+  /// The employee the change is about.
+  employeeId   Int?      @map("employee_id")
+  /// The calendar date the change affects (attendance date, leave start…).
+  affectedDate DateTime? @map("affected_date") @db.Date
+  /// Display text, e.g. "Corrected punch in".
+  summary      String    @db.VarChar(255)
+  /// `[{ field, label, before, after }]`, values formatted for display.
+  changes      Json
+  reason       String?   @db.VarChar(32)
+  remarks      String?   @db.Text
+  createdAt    DateTime  @default(now()) @map("created_at") @db.DateTime(3)
+
+  /// Only the main admin can delete users and employees (`/api/admin/...`).
+  /// Their history stays, without the link: the foreign key sets it to null
+  /// (MySQL doesn't fire the append-only triggers for foreign key actions).
+  actor    User?     @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+  employee Employee? @relation(fields: [employeeId], references: [id], onDelete: SetNull)
+
+  @@index([employeeId, affectedDate])
+  @@index([entityType, entityId])
+  @@index([createdAt(sort: Desc)])
+  @@map("audit_logs")
+}

@@ -1,0 +1,22 @@
+[
+  {
+    "id": "a-7-20260928",
+    "employee": {
+      "id": "7",
+      "name": "Arjun Joshi",
+      "ecNumber": "KC1019",
+      "department": "tailor",
+      "position": "tailor"
+    },
+    "date": "2026-09-28",
+    "punchIn": "2026-09-28T10:08:00+05:30",
+    "punchOut": null,
+    "workedMinutes": 262,
+    "workedPercent": 48.5,
+    "status": "late",
+    "note": null,
+    "lateMinutes": 23,
+    "correctedBy": null,
+    "correctedAt": null
+  }
+]

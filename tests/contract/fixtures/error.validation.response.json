@@ -1,0 +1,8 @@
+{
+  "message": "This EC number is already in use",
+  "errors": {
+    "ecNumber": [
+      "This EC number is already in use"
+    ]
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "items": [
+    {
+      "id": "41",
+      "employee": {
+        "id": "8",
+        "name": "Dhruv Parmar",
+        "ecNumber": "KC1022",
+        "department": "graphic_designer",
+        "position": "tailor"
+      },
+      "leaveType": {
+        "id": "casual",
+        "name": "Casual"
+      },
+      "startDate": "2026-10-05",
+      "endDate": "2026-10-07",
+      "days": 3,
+      "isHalfDay": false,
+      "reason": "family_function",
+      "remarks": null,
+      "status": "pending",
+      "addedBy": "Employee request",
+      "isPaid": true,
+      "balanceAfter": 4,
+      "unpaidPartId": null
+    }
+  ],
+  "total": 48,
+  "page": 1,
+  "pageSize": 10,
+  "counts": {
+    "all": 48,
+    "pending": 3,
+    "approved": 41,
+    "rejected": 2,
+    "cancelled": 2
+  }
+}
